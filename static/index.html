@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>HTML Form</title>
+    <script type="module" src="main.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1>HTML Form Demo</h1>
+      <p>This is a demo of doing client-side validation using browser APIs.</p>
+    </header>
+    <section>
+      <h2>Essential details</h2>
+      <!-- TODO Error displayer custom element -->
+      <validation-handler
+        form="#details"
+        default-error-location="#form-error"
+      ></validation-handler>
+      <validation-configure
+        form="#details"
+        validation-method="blur"
+      ></validation-configure>
+      <form method="post" novalidate id="details">
+        <label>
+          <span>First name</span>
+          <input 
+            type="text" 
+            id="first-name" 
+            name="first-name"
+            minlength="2"
+            required
+            data-required="Enter a first name"
+            data-minlength="Enter a first name with more than 2 characters"
+          >
+        </label>
+        <span id="first-name-error"></span>
+
+        <label>
+          <span>Last name</span>
+          <input 
+            type="text" 
+            id="last-name" 
+            name="last-name"
+            minlength="2"
+            required
+          >
+        </label>
+        <span id="last-name-error"></span>
+
+        <label>
+          <span>Email</span>
+          <input 
+            type="email" 
+            id="email" 
+            name="email"
+            required
+          >
+        </label>
+        <span id="email-error"></span>
+
+        <label>
+          <span>Phone number</span>
+          <input 
+            type="tel" 
+            id="phone-number" 
+            name="phone-number"
+            required
+          >
+        </label>
+        <span id="phone-number-error"></span>
+
+        <button type="submit">Save</button>
+
+        <span id="form-error"></span>
+      </form>
+    </section>
+    <style>
+      form {
+        & *, & * > * {
+          display: block;
+        }
+
+        & * > * {
+          margin-block-start: 0.5rem;
+        }
+        
+        & > *:not(span) {
+          margin-block-start: 1rem;
+        }
+
+        & > span {
+          margin-block-start: 0.25rem;
+        }
+      }
+
+      input {
+        &:user-invalid {
+          outline: 1px solid red;
+          outline-offset: 2px;
+          border-radius: 0.25rem;
+        }
+      }
+    </style>
+  </body>
+</html>
