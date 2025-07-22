@@ -120,47 +120,59 @@ class ValidationConfigure extends HTMLElement {
 
     for (const inputField of inputFields) {
       inputField.addEventListener(this.#validationMethod, (event) => {
-        console.log("[DEBUG] Validity:", event.target.validity);
         if (event.target.validity.valid) {
           ValidationConfigure.#success(event.target);
           return;
         }
-        console.log("[DEBUG] Message:", event.target.validationMessage);
 
         const { validity } = event.target;
-        // DEBUG sequence
-        const stack = [];
         if (validity.valueMissing) {
-          stack.push("required");
+          const message = event.target.getAttribute("data-required") ?? event.target.validationMessage;
+          ValidationConfigure.#error(event.target, message);
+          return;
         }
         if (validity.customError) {
-          stack.push("setCustomValidity");
+          const message = event.target.getAttribute("data-customValidity") ?? event.target.validationMessage;
+          ValidationConfigure.#error(event.target, message);
+          return;
         }
         if (validity.patternMismatch) {
-          stack.push("pattern");
+          const message = event.target.getAttribute("data-pattern") ?? event.target.validationMessage;
+          ValidationConfigure.#error(event.target, message);
+          return;
         }
         if (validity.badInput || validity.typeMismatch) {
-          stack.push("type");
+          const message = event.target.getAttribute("data-type") ?? event.target.validationMessage;
+          ValidationConfigure.#error(event.target, message);
+          return;
         }
         if (validity.rangeOverflow) {
-          stack.push("max");
+          const message = event.target.getAttribute("data-max") ?? event.target.validationMessage;
+          ValidationConfigure.#error(event.target, message);
+          return;
         }
         if (validity.rangeUnderflow) {
-          stack.push("min");
+          const message = event.target.getAttribute("data-min") ?? event.target.validationMessage;
+          ValidationConfigure.#error(event.target, message);
+          return;
         }
         if (validity.tooLong) {
-          stack.push("maxlength");
+          const message = event.target.getAttribute("data-maxlength") ?? event.target.validationMessage;
+          ValidationConfigure.#error(event.target, message);
+          return;
         }
         if (validity.tooShort) {
-          stack.push("minlength");
+          const message = event.target.getAttribute("data-minlength") ?? event.target.validationMessage;
+          ValidationConfigure.#error(event.target, message);
+          return;
         }
         if (validity.stepMismatch) {
-          stack.push("step");
+          const message = event.target.getAttribute("data-step") ?? event.target.validationMessage;
+          ValidationConfigure.#error(event.target, message);
+          return;
         }
 
-        console.log("[DEBUG] stack:", stack.join(", "));
-        console.log("[DEBUG] error:", event.target.validationMessage);
-
+        console.error("Unknown validity");
         ValidationConfigure.#error(event.target, event.target.validationMessage);
       }, { signal: this.#controller.signal });
     }
