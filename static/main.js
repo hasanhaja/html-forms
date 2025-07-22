@@ -126,6 +126,41 @@ class ValidationConfigure extends HTMLElement {
           return;
         }
         console.log("[DEBUG] Message:", event.target.validationMessage);
+
+        const { validity } = event.target;
+        // DEBUG sequence
+        const stack = [];
+        if (validity.valueMissing) {
+          stack.push("required");
+        }
+        if (validity.customError) {
+          stack.push("setCustomValidity");
+        }
+        if (validity.patternMismatch) {
+          stack.push("pattern");
+        }
+        if (validity.badInput || validity.typeMismatch) {
+          stack.push("type");
+        }
+        if (validity.rangeOverflow) {
+          stack.push("max");
+        }
+        if (validity.rangeUnderflow) {
+          stack.push("min");
+        }
+        if (validity.tooLong) {
+          stack.push("maxlength");
+        }
+        if (validity.tooShort) {
+          stack.push("minlength");
+        }
+        if (validity.stepMismatch) {
+          stack.push("step");
+        }
+
+        console.log("[DEBUG] stack:", stack.join(", "));
+        console.log("[DEBUG] error:", event.target.validationMessage);
+
         ValidationConfigure.#error(event.target, event.target.validationMessage);
       }, { signal: this.#controller.signal });
     }

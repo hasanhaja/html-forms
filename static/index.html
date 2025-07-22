@@ -29,6 +29,7 @@
             name="first-name"
             minlength="2"
             required
+            pattern="banana"
             data-required="Enter a first name"
             data-minlength="Enter a first name with more than 2 characters"
           >
@@ -36,8 +37,22 @@
         <span id="first-name-error"></span>
 
         <label>
+          <span>Amount</span>
+          <input
+            type="number"
+            id="amount"
+            name="amount"
+            min="2"
+            max="6"
+            step="2"
+            required
+          >
+        </label>
+        <span id="amount-error"></span>
+
+        <label>
           <span>Last name</span>
-          <input 
+          <input
             type="text" 
             id="last-name" 
             name="last-name"
