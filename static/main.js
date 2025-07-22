@@ -31,16 +31,16 @@ class ValidationHandler extends HTMLElement {
     }
   }
 
-  get #form() {
+  get form() {
     return this.getAttribute(ValidationHandler.attrs.form);
   }
 
-  get form() {
-    return document.querySelector(this.#form);
+  get #form() {
+    return document.querySelector(this.form);
   }
 
   connectedCallback() {
-    const form = this.form;
+    const form = this.#form;
     console.assert(form !== null);
     const inputFields = Array.from(form.querySelectorAll("input, select, textarea"));
     
@@ -123,12 +123,12 @@ class ValidationConfigure extends HTMLElement {
     this.#inputFieldNames = [];
   }
 
-  get #form() {
+  get form() {
     return this.getAttribute(ValidationHandler.attrs.form);
   }
 
-  get form() {
-    return document.querySelector(this.#form);
+  get #form() {
+    return document.querySelector(this.form);
   }
 
   get #validationMethod() {
@@ -136,7 +136,7 @@ class ValidationConfigure extends HTMLElement {
   }
 
   connectedCallback() {
-    const form = this.form;
+    const form = this.#form;
     console.assert(form !== null);
     const inputFields = Array.from(form.querySelectorAll("input, select, textarea"));
 
