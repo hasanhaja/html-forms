@@ -73,40 +73,6 @@ class ValidationHandler extends HTMLElement {
   }
 }
 
-/**
-  * @typedef { Object } Validity
-  * @property { string } [message]
-  * @property { string } location
-  */
-
-/**
-  * @param { "validation-error" | "validation-success" } type
-  * @param { Validity } data
-  */
-function emit(type, data) {
-  const event = new CustomEvent(type, {
-    detail: data,
-    bubbles: true,
-  });
-  return event;
-}
-
-function error(element, message) {
-  element.dispatchEvent(
-    emit("validation-error", {
-      message,
-      location: element.id,
-    })
-  );
-}
-
-function success(element) {
-  element.dispatchEvent(
-    emit("validation-success", {
-      location: element.id,
-    })
-  );
-}
 
 class ValidationConfigure extends HTMLElement {
   static tagName = "validation-configure";
@@ -146,23 +112,62 @@ class ValidationConfigure extends HTMLElement {
       return;
     }
 
+    if (form.getAttribute("novalidate") === null) {
+      form.setAttribute("novalidate", "");
+    }
+
     const inputFields = Array.from(form.querySelectorAll("input, select, textarea"));
 
     for (const inputField of inputFields) {
       inputField.addEventListener(this.#validationMethod, (event) => {
         console.log("[DEBUG] Validity:", event.target.validity);
         if (event.target.validity.valid) {
-          success(event.target);
+          ValidationConfigure.#success(event.target);
           return;
         }
         console.log("[DEBUG] Message:", event.target.validationMessage);
-        error(event.target, event.target.validationMessage);
+        ValidationConfigure.#error(event.target, event.target.validationMessage);
       }, { signal: this.#controller.signal });
     }
   }
 
   disconnectedCallback() {
     this.#controller.abort();
+  }
+
+  /**
+  * @typedef { Object } Validity
+  * @property { string } [message]
+  * @property { string } location
+  */
+
+  /**
+    * @param { "validation-error" | "validation-success" } type
+    * @param { Validity } data
+    */
+  static #emit(type, data) {
+    const event = new CustomEvent(type, {
+      detail: data,
+      bubbles: true,
+    });
+    return event;
+  }
+
+  static #error(element, message) {
+    element.dispatchEvent(
+      ValidationConfigure.#emit("validation-error", {
+        message,
+        location: element.id,
+      })
+    );
+  }
+
+  static #success(element) {
+    element.dispatchEvent(
+      ValidationConfigure.#emit("validation-success", {
+        location: element.id,
+      })
+    );
   }
 }
 
