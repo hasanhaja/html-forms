@@ -41,7 +41,11 @@ class ValidationHandler extends HTMLElement {
 
   connectedCallback() {
     const form = this.#form;
-    console.assert(form !== null);
+    if (form === null) {
+      console.error(`Form element '${this.form}' not found.`);
+      return;
+    }
+
     const inputFields = Array.from(form.querySelectorAll("input, select, textarea"));
     
     for (const inputField of inputFields) {
@@ -137,7 +141,11 @@ class ValidationConfigure extends HTMLElement {
 
   connectedCallback() {
     const form = this.#form;
-    console.assert(form !== null);
+    if (form === null) {
+      console.error(`Form element '${this.form}' not found.`);
+      return;
+    }
+
     const inputFields = Array.from(form.querySelectorAll("input, select, textarea"));
 
     for (const inputField of inputFields) {
