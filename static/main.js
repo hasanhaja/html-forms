@@ -8,6 +8,7 @@ class ValidationHandler extends HTMLElement {
   #controller;
   #inputFieldNames;
   #errorElementMap;
+  #defaultErrorElement;
 
   constructor() {
     super();
@@ -18,7 +19,11 @@ class ValidationHandler extends HTMLElement {
 
   #putError(fieldName, message) {
     const errorLocation = this.#errorElementMap.get(fieldName);
-    errorLocation.textContent = message;
+    if (errorLocation) {
+      errorLocation.textContent = message;
+    } else {
+      this.#defaultErrorElement.textContent = message;
+    }
   }
 
   #clearError(fieldName) {
@@ -36,6 +41,10 @@ class ValidationHandler extends HTMLElement {
     return this.getAttribute(ValidationHandler.attrs.form);
   }
 
+  get defaultErrorLocation() {
+    return this.getAttribute(ValidationHandler.attrs.defaultErrorLocation);
+  }
+
   get #form() {
     return document.querySelector(this.form);
   }
@@ -46,6 +55,7 @@ class ValidationHandler extends HTMLElement {
       console.error(`Form element '${this.form}' not found.`);
       return;
     }
+    this.#defaultErrorElement = document.querySelector(this.defaultErrorLocation);
 
     const inputFields = Array.from(form.querySelectorAll("input, select, textarea"));
 
@@ -53,8 +63,10 @@ class ValidationHandler extends HTMLElement {
       this.#inputFieldNames.push(inputField.name);
       // TODO split and search for one with error suffix
       const errorElementRef = inputField.getAttribute("aria-describedby");
-      const errorElement = document.getElementById(errorElementRef ?? `${fieldName}-error`);
-      this.#errorElementMap.set(inputField.name, errorElement);
+      const errorElement = document.getElementById(errorElementRef ?? `${inputField.name}-error`);
+      if (errorElement) {
+        this.#errorElementMap.set(inputField.name, errorElement);
+      }
     }
 
     form.addEventListener("val-error", (event) => {
