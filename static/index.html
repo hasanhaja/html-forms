@@ -31,9 +31,9 @@
             minlength="2"
             required
             pattern="banana"
-            data-pattern="Enter 'banana'"
-            data-required="Enter a first name"
-            data-minlength="Enter a first name with more than 2 characters"
+            data-val-pattern="Enter 'banana'"
+            data-val-required="Enter a first name"
+            data-val-minlength="Enter a first name with more than 2 characters"
           >
         </label>
         <!-- TODO review syntax and selector for this -->
@@ -49,8 +49,8 @@
             min="2"
             max="6"
             step="2"
-            data-step="Enter an even number"
-            data-required="Enter an amount"
+            data-val-step="Enter an even number"
+            data-val-required="Enter an amount"
             required
           >
         </label>
@@ -75,6 +75,7 @@
             id="email" 
             name="email"
             required
+            data-val-required="Enter an email"
           >
         </label>
         <span id="email-error"></span>

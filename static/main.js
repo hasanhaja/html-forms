@@ -149,47 +149,47 @@ class ValidationConfigure extends HTMLElement {
 
     const { validity } = event.target;
     if (validity.valueMissing) {
-      const message = event.target.getAttribute("data-required") ?? event.target.validationMessage;
+      const message = event.target.getAttribute("data-val-required") ?? event.target.validationMessage;
       ValidationConfigure.#error(event.target, message);
       return;
     }
     if (validity.customError) {
-      const message = event.target.getAttribute("data-customValidity") ?? event.target.validationMessage;
+      const message = event.target.getAttribute("data-val-customValidity") ?? event.target.validationMessage;
       ValidationConfigure.#error(event.target, message);
       return;
     }
     if (validity.patternMismatch) {
-      const message = event.target.getAttribute("data-pattern") ?? event.target.validationMessage;
+      const message = event.target.getAttribute("data-val-pattern") ?? event.target.validationMessage;
       ValidationConfigure.#error(event.target, message);
       return;
     }
     if (validity.badInput || validity.typeMismatch) {
-      const message = event.target.getAttribute("data-type") ?? event.target.validationMessage;
+      const message = event.target.getAttribute("data-val-type") ?? event.target.validationMessage;
       ValidationConfigure.#error(event.target, message);
       return;
     }
     if (validity.rangeOverflow) {
-      const message = event.target.getAttribute("data-max") ?? event.target.validationMessage;
+      const message = event.target.getAttribute("data-val-max") ?? event.target.validationMessage;
       ValidationConfigure.#error(event.target, message);
       return;
     }
     if (validity.rangeUnderflow) {
-      const message = event.target.getAttribute("data-min") ?? event.target.validationMessage;
+      const message = event.target.getAttribute("data-val-min") ?? event.target.validationMessage;
       ValidationConfigure.#error(event.target, message);
       return;
     }
     if (validity.tooLong) {
-      const message = event.target.getAttribute("data-maxlength") ?? event.target.validationMessage;
+      const message = event.target.getAttribute("data-val-maxlength") ?? event.target.validationMessage;
       ValidationConfigure.#error(event.target, message);
       return;
     }
     if (validity.tooShort) {
-      const message = event.target.getAttribute("data-minlength") ?? event.target.validationMessage;
+      const message = event.target.getAttribute("data-val-minlength") ?? event.target.validationMessage;
       ValidationConfigure.#error(event.target, message);
       return;
     }
     if (validity.stepMismatch) {
-      const message = event.target.getAttribute("data-step") ?? event.target.validationMessage;
+      const message = event.target.getAttribute("data-val-step") ?? event.target.validationMessage;
       ValidationConfigure.#error(event.target, message);
       return;
     }
