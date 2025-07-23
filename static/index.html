@@ -11,15 +11,16 @@
     </header>
     <section>
       <h2>Essential details</h2>
-      <!-- TODO Error displayer custom element -->
-      <validation-handler
+
+      <val-setup
+        form="#details"
+        validate-on="blur"
+      ></val-setup>
+      <val-handler
         form="#details"
         default-error-location="#form-error"
-      ></validation-handler>
-      <validation-configure
-        form="#details"
-        validation-method="blur"
-      ></validation-configure>
+      ></val-handler>
+
       <form method="post" id="details">
         <label>
           <span>First name</span>

@@ -1,10 +1,10 @@
 class ValidationHandler extends HTMLElement {
-  static tagName = "validation-handler";
+  static tagName = "val-handler";
   static attrs = {
     form: "form",
     defaultErrorLocation: "default-error-location", 
   };
-  
+
   #controller;
   #inputFieldNames;
   #errorElementMap;
@@ -48,7 +48,7 @@ class ValidationHandler extends HTMLElement {
     }
 
     const inputFields = Array.from(form.querySelectorAll("input, select, textarea"));
-    
+
     for (const inputField of inputFields) {
       this.#inputFieldNames.push(inputField.name);
       // TODO split and search for one with error suffix
@@ -79,15 +79,13 @@ class ValidationHandler extends HTMLElement {
   }
 }
 
-
-class ValidationConfigure extends HTMLElement {
-  static tagName = "validation-configure";
+class ValidationSetup extends HTMLElement {
+  static tagName = "val-setup";
   static attrs = {
     form: "form",
-    validationMethod: "validation-method", 
+    validateOn: "validate-on",
   };
 
-    
   #controller;
   #inputFieldNames;
 
@@ -105,8 +103,8 @@ class ValidationConfigure extends HTMLElement {
     return document.querySelector(this.form);
   }
 
-  get #validationMethod() {
-    return this.getAttribute(ValidationConfigure.attrs.validationMethod) ?? "blur";
+  get #validateOn() {
+    return this.getAttribute(ValidationSetup.attrs.validateOn) ?? "blur";
   }
 
   connectedCallback() {
@@ -123,7 +121,7 @@ class ValidationConfigure extends HTMLElement {
     const inputFields = Array.from(form.querySelectorAll("input, select, textarea"));
 
     form.addEventListener("submit", (event) => {
-      ValidationConfigure.#submit(event.target);
+      ValidationSetup.#submit(event.target);
 
       const fields = [];
       for (const inputField of inputFields) {
@@ -139,8 +137,8 @@ class ValidationConfigure extends HTMLElement {
     });
 
     for (const inputField of inputFields) {
-      inputField.addEventListener(this.#validationMethod, ValidationConfigure.#validateAndEmit, { signal: this.#controller.signal });
-      inputField.addEventListener("invalid", ValidationConfigure.#validateAndEmit, { signal: this.#controller.signal });
+      inputField.addEventListener(this.#validateOn, ValidationSetup.#validateAndEmit, { signal: this.#controller.signal });
+      inputField.addEventListener("invalid", ValidationSetup.#validateAndEmit, { signal: this.#controller.signal });
     }
   }
 
@@ -150,63 +148,63 @@ class ValidationConfigure extends HTMLElement {
 
   static #validateAndEmit(event) {
     if (event.target.validity.valid) {
-      ValidationConfigure.#success(event.target, event.target.getAttribute("data-val-server") !== null);
+      ValidationSetup.#success(event.target, event.target.getAttribute("data-val-server") !== null);
       return;
     }
 
     const { validity } = event.target;
     if (validity.valueMissing) {
       const message = event.target.getAttribute("data-val-required") ?? event.target.validationMessage;
-      ValidationConfigure.#error(event.target, message);
+      ValidationSetup.#error(event.target, message);
       return;
     }
     if (validity.customError) {
       const message = event.target.getAttribute("data-val-customValidity") ?? event.target.validationMessage;
-      ValidationConfigure.#error(event.target, message);
+      ValidationSetup.#error(event.target, message);
       return;
     }
     if (validity.patternMismatch) {
       const message = event.target.getAttribute("data-val-pattern") ?? event.target.validationMessage;
-      ValidationConfigure.#error(event.target, message);
+      ValidationSetup.#error(event.target, message);
       return;
     }
     if (validity.badInput || validity.typeMismatch) {
       const message = event.target.getAttribute("data-val-type") ?? event.target.validationMessage;
-      ValidationConfigure.#error(event.target, message);
+      ValidationSetup.#error(event.target, message);
       return;
     }
     if (validity.rangeOverflow) {
       const message = event.target.getAttribute("data-val-max") ?? event.target.validationMessage;
-      ValidationConfigure.#error(event.target, message);
+      ValidationSetup.#error(event.target, message);
       return;
     }
     if (validity.rangeUnderflow) {
       const message = event.target.getAttribute("data-val-min") ?? event.target.validationMessage;
-      ValidationConfigure.#error(event.target, message);
+      ValidationSetup.#error(event.target, message);
       return;
     }
     if (validity.tooLong) {
       const message = event.target.getAttribute("data-val-maxlength") ?? event.target.validationMessage;
-      ValidationConfigure.#error(event.target, message);
+      ValidationSetup.#error(event.target, message);
       return;
     }
     if (validity.tooShort) {
       const message = event.target.getAttribute("data-val-minlength") ?? event.target.validationMessage;
-      ValidationConfigure.#error(event.target, message);
+      ValidationSetup.#error(event.target, message);
       return;
     }
     if (validity.stepMismatch) {
       const message = event.target.getAttribute("data-val-step") ?? event.target.validationMessage;
-      ValidationConfigure.#error(event.target, message);
+      ValidationSetup.#error(event.target, message);
       return;
     }
 
     console.error("Unknown validity");
-    ValidationConfigure.#error(event.target, event.target.validationMessage);
+    ValidationSetup.#error(event.target, event.target.validationMessage);
   }
 
   /**
-  * @typedef { Object } Validity
+  * @typedef { object } Validity
   * @property { string } [message]
   * @property { string } [location]
   * @property { boolean } [validateOnServer]
@@ -226,7 +224,7 @@ class ValidationConfigure extends HTMLElement {
 
   static #error(element, message) {
     element.dispatchEvent(
-      ValidationConfigure.#emit("val-error", {
+      ValidationSetup.#emit("val-error", {
         message,
         location: element.id,
       })
@@ -235,7 +233,7 @@ class ValidationConfigure extends HTMLElement {
 
   static #success(element, validateOnServer = false) {
     element.dispatchEvent(
-      ValidationConfigure.#emit("val-success", {
+      ValidationSetup.#emit("val-success", {
         location: element.id,
         validateOnServer,
       })
@@ -244,12 +242,12 @@ class ValidationConfigure extends HTMLElement {
 
   static #submit(element) {
     element.dispatchEvent(
-      ValidationConfigure.#emit("val-submit")
+      ValidationSetup.#emit("val-submit")
     );
   }
 }
 
-customElements.define(ValidationConfigure.tagName, ValidationConfigure);
+customElements.define(ValidationSetup.tagName, ValidationSetup);
 customElements.define(ValidationHandler.tagName, ValidationHandler);
 
 const form = document.querySelector("form");
