@@ -1,6 +1,5 @@
 class ValidationHandler extends HTMLElement {
   static tagName = "validation-handler";
-  // TODO Add observe
   static attrs = {
     form: "form",
     defaultErrorLocation: "default-error-location", 
@@ -52,30 +51,19 @@ class ValidationHandler extends HTMLElement {
       this.#inputFieldNames.push(inputField.name);
     }
 
-    form.addEventListener("validation-error", (event) => {
+    form.addEventListener("val-error", (event) => {
       console.log("[ValidationHandler] errors:", event.detail);
       const { location, message } = event.detail;
       this.#putError(location, message);
     }, { signal: this.#controller.signal });
     
-    form.addEventListener("validation-success", (event) => {
+    form.addEventListener("val-success", (event) => {
       const { location, message } = event.detail;
       this.#clearError(location);
     }, { signal: this.#controller.signal });
     
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("val-submit", (event) => {
       this.#clearErrors();
-      const fields = [];
-      for (const inputField of inputFields) {
-        fields.push(inputField.checkValidity());
-      }
-      // Prevent form from submitting because 'novalidate' was added
-      for (const valid of fields) {
-        if (!valid) {
-          event.preventDefault();
-          break;
-        }
-      }
     }, { signal: this.#controller.signal });
   }
 
@@ -87,8 +75,6 @@ class ValidationHandler extends HTMLElement {
 
 class ValidationConfigure extends HTMLElement {
   static tagName = "validation-configure";
-  // TODO listen for slot changed and re-register all inputs
-  // TODO Add observe
   static attrs = {
     form: "form",
     validationMethod: "validation-method", 
@@ -128,6 +114,22 @@ class ValidationConfigure extends HTMLElement {
     }
 
     const inputFields = Array.from(form.querySelectorAll("input, select, textarea"));
+
+    form.addEventListener("submit", (event) => {
+      ValidationConfigure.#submit(event.target);
+
+      const fields = [];
+      for (const inputField of inputFields) {
+        fields.push(inputField.checkValidity());
+      }
+      // Prevent form from submitting because 'novalidate' was added
+      for (const valid of fields) {
+        if (!valid) {
+          event.preventDefault();
+          break;
+        }
+      }
+    });
 
     for (const inputField of inputFields) {
       inputField.addEventListener(this.#validationMethod, ValidationConfigure.#validateAndEmit, { signal: this.#controller.signal });
@@ -199,11 +201,12 @@ class ValidationConfigure extends HTMLElement {
   /**
   * @typedef { Object } Validity
   * @property { string } [message]
-  * @property { string } location
+  * @property { string } [location]
+  * @property { boolean } [validateOnServer]
   */
 
   /**
-    * @param { "validation-error" | "validation-success" } type
+    * @param { "val-error" | "val-success" | "val-submit" } type
     * @param { Validity } data
     */
   static #emit(type, data) {
@@ -216,18 +219,25 @@ class ValidationConfigure extends HTMLElement {
 
   static #error(element, message) {
     element.dispatchEvent(
-      ValidationConfigure.#emit("validation-error", {
+      ValidationConfigure.#emit("val-error", {
         message,
         location: element.id,
       })
     );
   }
 
-  static #success(element) {
+  static #success(element, validateOnServer = false) {
     element.dispatchEvent(
-      ValidationConfigure.#emit("validation-success", {
+      ValidationConfigure.#emit("val-success", {
         location: element.id,
+        validateOnServer,
       })
+    );
+  }
+
+  static #submit(element) {
+    element.dispatchEvent(
+      ValidationConfigure.#emit("val-submit")
     );
   }
 }
