@@ -58,6 +58,7 @@ class ValidationHandler extends HTMLElement {
     }, { signal: this.#controller.signal });
     
     form.addEventListener("val-success", (event) => {
+      console.log("[ValidationHandler] success:", event.detail);
       const { location, message } = event.detail;
       this.#clearError(location);
     }, { signal: this.#controller.signal });
@@ -143,7 +144,7 @@ class ValidationConfigure extends HTMLElement {
 
   static #validateAndEmit(event) {
     if (event.target.validity.valid) {
-      ValidationConfigure.#success(event.target);
+      ValidationConfigure.#success(event.target, event.target.getAttribute("data-val-server") !== null);
       return;
     }
 
