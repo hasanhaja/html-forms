@@ -7,20 +7,22 @@ class ValidationHandler extends HTMLElement {
   
   #controller;
   #inputFieldNames;
+  #errorElementMap;
 
   constructor() {
     super();
     this.#controller = new AbortController();
     this.#inputFieldNames = [];
+    this.#errorElementMap = new Map();
   }
 
   #putError(fieldName, message) {
-    const errorLocation = document.getElementById(`${fieldName}-error`); 
+    const errorLocation = this.#errorElementMap.get(fieldName);
     errorLocation.textContent = message;
   }
 
   #clearError(fieldName) {
-    const errorLocation = document.getElementById(`${fieldName}-error`); 
+    const errorLocation = this.#errorElementMap.get(fieldName);
     errorLocation.textContent = null;
   }
 
@@ -49,6 +51,10 @@ class ValidationHandler extends HTMLElement {
     
     for (const inputField of inputFields) {
       this.#inputFieldNames.push(inputField.name);
+      // TODO split and search for one with error suffix
+      const errorElementRef = inputField.getAttribute("aria-describedby");
+      const errorElement = document.getElementById(errorElementRef ?? `${fieldName}-error`);
+      this.#errorElementMap.set(inputField.name, errorElement);
     }
 
     form.addEventListener("val-error", (event) => {
