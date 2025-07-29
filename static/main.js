@@ -96,6 +96,7 @@ class ValidationSetup extends HTMLElement {
   static attrs = {
     form: "form",
     validateOn: "validate-on",
+    valAction: "val-action",
   };
 
   #controller;
@@ -135,12 +136,8 @@ class ValidationSetup extends HTMLElement {
     form.addEventListener("submit", (event) => {
       ValidationSetup.#submit(event.target);
 
-      const fields = [];
       for (const inputField of inputFields) {
-        fields.push(inputField.checkValidity());
-      }
-      // Prevent form from submitting because 'novalidate' was added
-      for (const valid of fields) {
+        const valid = inputField.checkValidity();
         if (!valid) {
           event.preventDefault();
           break;
@@ -160,18 +157,21 @@ class ValidationSetup extends HTMLElement {
 
   static #validateAndEmit(event) {
     if (event.target.validity.valid) {
-      ValidationSetup.#success(event.target, event.target.getAttribute("data-val-server") !== null);
+      if (event.target.getAttribute("data-val-server") !== null) {
+        // TODO make request to server
+      }
+      ValidationSetup.#success(event.target);
       return;
     }
 
     const { validity } = event.target;
-    if (validity.valueMissing) {
-      const message = event.target.getAttribute("data-val-required") ?? event.target.validationMessage;
+    if (validity.customError) {
+      const message = event.target.validationMessage;
       ValidationSetup.#error(event.target, message);
       return;
     }
-    if (validity.customError) {
-      const message = event.target.getAttribute("data-val-customValidity") ?? event.target.validationMessage;
+    if (validity.valueMissing) {
+      const message = event.target.getAttribute("data-val-required") ?? event.target.validationMessage;
       ValidationSetup.#error(event.target, message);
       return;
     }
@@ -219,7 +219,6 @@ class ValidationSetup extends HTMLElement {
   * @typedef { object } Validity
   * @property { string } [message]
   * @property { string } [location]
-  * @property { boolean } [validateOnServer]
   */
 
   /**
@@ -243,11 +242,10 @@ class ValidationSetup extends HTMLElement {
     );
   }
 
-  static #success(element, validateOnServer = false) {
+  static #success(element) {
     element.dispatchEvent(
       ValidationSetup.#emit("val-success", {
         location: element.id,
-        validateOnServer,
       })
     );
   }
@@ -263,6 +261,22 @@ customElements.define(ValidationSetup.tagName, ValidationSetup);
 customElements.define(ValidationHandler.tagName, ValidationHandler);
 
 const form = document.querySelector("form");
+const lastName = window["last-name"];
+
+lastName.addEventListener("blur", (event) => {
+  // Validate with the built-in constraints first
+  event.target.setCustomValidity("");
+  if (!event.target.validity.valid) {
+    return;
+  }
+
+  // Then, extend with a custom constraints
+  if (event.target.value.endsWith("an")) {
+    event.target.setCustomValidity("Enter a last name that does not end in 'an'");
+    // Trigger 'invalid' event
+    event.target.checkValidity();
+  }
+});
 
 form.addEventListener("submit", (event) => {
   console.log("[form] Submit triggered:", event);
