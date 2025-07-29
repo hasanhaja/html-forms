@@ -118,6 +118,10 @@ class ValidationSetup extends HTMLElement {
     return this.getAttribute(ValidationSetup.attrs.validateOn) ?? "blur";
   }
 
+  get valAction() {
+    return this.getAttribute(ValidationSetup.attrs.valAction) ?? "";
+  }
+
   connectedCallback() {
     const form = this.#form;
     if (form === null) {
@@ -144,8 +148,8 @@ class ValidationSetup extends HTMLElement {
     });
 
     for (const inputField of inputFields) {
-      inputField.addEventListener(this.#validateOn, ValidationSetup.#validateAndEmit, { signal: this.#controller.signal });
-      inputField.addEventListener("invalid", ValidationSetup.#validateAndEmit, { signal: this.#controller.signal });
+      inputField.addEventListener(this.#validateOn, ValidationSetup.#validateAndEmit.bind(this), { signal: this.#controller.signal });
+      inputField.addEventListener("invalid", ValidationSetup.#validateAndEmit.bind(this), { signal: this.#controller.signal });
     }
   }
 
@@ -157,6 +161,25 @@ class ValidationSetup extends HTMLElement {
     if (event.target.validity.valid) {
       if (event.target.getAttribute("data-val-server") !== null) {
         // TODO make request to server
+        // construct query: /validate?email='asdf'
+        const params = new URLSearchParams({[event.target.name]: event.target.value});
+        const validateUrl = new URL(`${this.valAction}?${params}`, document.URL);
+
+        fetch(validateUrl)
+        .then((res) => res.json())
+        .then((data) => {
+          // TODO Parse data
+          if (data.err) {
+            ValidationSetup.#error(event.target, err.message);
+          } else {
+            ValidationSetup.#success(event.target);
+          }
+        })
+        .catch((err) => {
+          // Should this be default error or also inline
+          ValidationSetup.#error(event.target, err.message);
+        });
+        return;
       }
       ValidationSetup.#success(event.target);
       return;
