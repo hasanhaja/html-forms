@@ -70,13 +70,11 @@ class ValidationHandler extends HTMLElement {
     }
 
     form.addEventListener("val-error", (event) => {
-      console.log("[ValidationHandler] errors:", event.detail);
       const { location, message } = event.detail;
       this.#putError(location, message);
     }, { signal: this.#controller.signal });
     
     form.addEventListener("val-success", (event) => {
-      console.log("[ValidationHandler] success:", event.detail);
       const { location, message } = event.detail;
       this.#clearError(location);
     }, { signal: this.#controller.signal });
