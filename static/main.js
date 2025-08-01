@@ -176,7 +176,7 @@ class ValidationSetup extends HTMLElement {
             }
           })
           .catch((_) => {
-            console.error("Server response is not JSON with valid and message properties");
+            console.error(`Server response is not valid JSON. Example response, ${JSON.stringify({valid: false, message: "Enter a valid email"})}`);
             ValidationSetup.#error(event.target, `Server response is not valid JSON. Example response, ${JSON.stringify({valid: false, message: "Enter a valid email"})}`);
           });
         return;
