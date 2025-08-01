@@ -160,25 +160,25 @@ class ValidationSetup extends HTMLElement {
   static #validateAndEmit(event) {
     if (event.target.validity.valid) {
       if (event.target.getAttribute("data-val-server") !== null) {
-        // TODO make request to server
-        // construct query: /validate?email='asdf'
-        const params = new URLSearchParams({[event.target.name]: event.target.value});
+        const params = new URLSearchParams([
+          ["field", event.target.name],
+          ["value", event.target.value],
+        ]);
         const validateUrl = new URL(`${this.valAction}?${params}`, document.URL);
 
         fetch(validateUrl)
-        .then((res) => res.json())
-        .then((data) => {
-          // TODO Parse data
-          if (data.err) {
-            ValidationSetup.#error(event.target, err.message);
-          } else {
-            ValidationSetup.#success(event.target);
-          }
-        })
-        .catch((err) => {
-          // Should this be default error or also inline
-          ValidationSetup.#error(event.target, err.message);
-        });
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.valid) {
+              ValidationSetup.#success(event.target);
+            } else {
+              ValidationSetup.#error(event.target, data.message);
+            }
+          })
+          .catch((_) => {
+            console.error("Server response is not JSON with valid and message properties");
+            ValidationSetup.#error(event.target, `Server response is not valid JSON. Example response, ${JSON.stringify({valid: false, message: "Enter a valid email"})}`);
+          });
         return;
       }
       ValidationSetup.#success(event.target);
