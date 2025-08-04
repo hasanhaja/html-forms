@@ -138,12 +138,14 @@ class ValidationSetup extends HTMLElement {
     form.addEventListener("submit", (event) => {
       ValidationSetup.#submit(event.target);
 
+      let valid = true;
       for (const inputField of inputFields) {
-        const valid = inputField.checkValidity();
-        if (!valid) {
-          event.preventDefault();
-          break;
+        if (!inputField.checkValidity()) {
+          valid = false;
         }
+      }
+      if (!valid) {
+        event.preventDefault();
       }
     });
 
