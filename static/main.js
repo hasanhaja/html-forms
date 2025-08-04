@@ -100,10 +100,26 @@ class ValidationSetup extends HTMLElement {
   #controller;
   #inputFieldNames;
 
+  /**
+    * @typedef {(string) => boolean} Predicate
+    * @typedef { Array<[Predicate, string]> } Rules
+    * @type {Map<string, Rules>}
+    */
+  #schema;
+
   constructor() {
     super();
     this.#controller = new AbortController();
     this.#inputFieldNames = [];
+    this.#schema = new Map();
+  }
+
+  /**
+    * @param { string } field
+    * @param { Rules } rules
+    */
+  setFieldSchema(field, rules) {
+    this.#schema.set(field, rules);
   }
 
   get form() {
@@ -157,8 +173,38 @@ class ValidationSetup extends HTMLElement {
     this.#controller.abort();
   }
 
+  #validateWithCustomSchema(field, value) {
+    const rules = this.#schema.get(field);
+    if (!rules) {
+      return { valid: true, message: "OK" };
+    }
+
+    for (const [predicate, message] of rules) {
+      if (!predicate(value)) {
+        return { valid: false, message };
+      }
+    }
+    return { valid: true, message: "OK" };
+  }
+
   static #validateAndEmit(event) {
+    if (event.type === "blur") {
+      event.target.setCustomValidity("");
+    }
+
     if (event.target.validity.valid) {
+      if (this.#schema.size > 0) {
+        const {valid, message} = this.#validateWithCustomSchema(event.target.name, event.target.value);
+        if (valid) {
+          event.target.setCustomValidity("");
+          event.target.checkValidity();
+        } else {
+          event.target.setCustomValidity(message);
+          event.target.checkValidity();
+          return;
+        }
+      }
+
       if (event.target.getAttribute("data-val-server") !== null) {
         const params = new URLSearchParams([
           ["field", event.target.name],
@@ -283,6 +329,33 @@ customElements.define(ValidationHandler.tagName, ValidationHandler);
 
 const form = document.querySelector("form");
 const lastName = window["last-name"];
+const firstName = window["first-name"];
+
+// Custom validation
+const validationSetup = document.querySelector("val-setup[form='#details']");
+validationSetup.setFieldSchema("first-name", [
+  [(value) => value.toLowerCase().startsWith("has"), "Does not start with 'has'"],
+  [(value) => value.toLowerCase().endsWith("an"), "Does not end with 'an'"],
+]);
+
+validationSetup.setFieldSchema("last-name", [
+  [(value) => value.toLowerCase().startsWith("blo"), "Does not start with 'blo'"],
+]);
+
+firstName.addEventListener("blur", (event) => {
+  // Validate with the built-in constraints first
+  event.target.setCustomValidity("");
+  if (!event.target.validity.valid) {
+    return;
+  }
+
+  // Then, extend with a custom constraints
+  if (event.target.value.includes("b")) {
+    event.target.setCustomValidity("Enter a first name that does not include 'b'");
+    // Trigger 'invalid' event
+    event.target.checkValidity();
+  }
+});
 
 lastName.addEventListener("blur", (event) => {
   // Validate with the built-in constraints first
@@ -292,8 +365,8 @@ lastName.addEventListener("blur", (event) => {
   }
 
   // Then, extend with a custom constraints
-  if (event.target.value.endsWith("an")) {
-    event.target.setCustomValidity("Enter a last name that does not end in 'an'");
+  if (event.target.value.endsWith("gs")) {
+    event.target.setCustomValidity("Enter a last name that does not end in 'gs'");
     // Trigger 'invalid' event
     event.target.checkValidity();
   }
