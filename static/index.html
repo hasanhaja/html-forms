@@ -32,10 +32,11 @@
             name="first-name"
             minlength="2"
             required
-            pattern="banana"
-            data-val-pattern="Enter 'banana'"
+            pattern="\w{0,10}"
+            data-val-pattern="Enter a first name with less than 10 characters"
             data-val-required="Enter a first name"
             data-val-minlength="Enter a first name with more than 2 characters"
+            data-val-maxlength="Enter a first name with less than 6 characters"
             aria-describedby="first-name-error"
           >
         </label>
